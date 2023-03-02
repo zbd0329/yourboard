@@ -2,6 +2,7 @@ package com.example.yourboard.entity;
 
 import com.example.yourboard.dto.BoardRequestDto;
 import com.example.yourboard.dto.BoardResponseDto;
+import com.example.yourboard.repository.BoardRepository;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -45,6 +46,15 @@ public class Board extends TimeStamped {
         this.author = boardRequestDto.getAuthor();
         this.password = boardRequestDto.getPassword();
     }
+
+    public void delete(BoardRequestDto boardRequestDto) {
+        this.title = boardRequestDto.getTitle();
+        this.content = boardRequestDto.getContent();
+        this.author = boardRequestDto.getAuthor();
+        this.password = boardRequestDto.getPassword();
+    }
+
+
 }
 
 

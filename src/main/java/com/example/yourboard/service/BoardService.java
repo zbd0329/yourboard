@@ -5,7 +5,6 @@ import com.example.yourboard.dto.BoardResponseDto;
 import com.example.yourboard.entity.Board;
 import com.example.yourboard.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,8 +14,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class BoardService {
-
-
 
 
     private final BoardRepository boardRepository;
@@ -29,12 +26,12 @@ public class BoardService {
         return board;
 
     }
-
+//쉬프트 에프6 한번에 바꾸
 
     //게시글 확인
     @Transactional(readOnly = true)
-    public List<Board> getBoard()  {
-        return boardRepository.findAllByIdAndModifiedAtDesc(); //findAll을 써도 되는가
+    public List<Board> getBoard() {
+        return boardRepository.findAll(); //findAll을 써도 되는가
     }
 
 
@@ -48,8 +45,6 @@ public class BoardService {
     }
 
 
-
-
     //게시글 수정
     @Transactional
     public BoardResponseDto updateBoard(Long id, BoardRequestDto boardRequestDto) {
@@ -57,25 +52,38 @@ public class BoardService {
         if (board.getPassword().equals(boardRequestDto.getPassword())) {
             board.update(boardRequestDto);
         } else {
-            System.out.println("비밀번호가 일치하지 않는다옹"); //sout이 과연 보내질 것인가?
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+
         }
 
         return new BoardResponseDto(board);
     }
 
-
+    //비밀번호 확인
     private Board checkBoard(Long id) {
         return boardRepository.findById(id).orElseThrow(
-                () -> new NullPointerException("일치하는 게시글 없또")
+                () -> new IllegalArgumentException("일치하는 게시글 없또")
         );
     }
 
+
     @Transactional
-    public Long deleteBoard(Long id) {
-        boardRepository.deleteById(id);
-        return id;
+    public void deleteBoard(Long id, BoardRequestDto boardRequestDto) {
+        Board board = checkBoard(id);
+        if (board.getPassword().equals(boardRequestDto.getPassword())) {
+            boardRepository.deleteById(id);
+        } else {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
     }
+
+
 }
+
+
+
+
 
 
 
@@ -95,7 +103,9 @@ public class BoardService {
 //        쓰면 안된다.예상하지 못한 에러가 나면?그것에 대한 대비가 안된다.널포인터리셉션. "String"
 //        equls(board.getPasswqrd) null equels는 없다.null safe equals.
 
-
+//            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+//삭제완료는 어떻게 보낼것인가?
+//string으로 바꾸기
 
 
 

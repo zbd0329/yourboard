@@ -1,5 +1,6 @@
 package com.example.yourboard.dto;
 
+import com.example.yourboard.entity.Board;
 import lombok.Getter;
 
 @Getter
@@ -9,5 +10,6 @@ public class BoardRequestDto {
     private String content;
     private String author;
     private String password;
+
 
 }

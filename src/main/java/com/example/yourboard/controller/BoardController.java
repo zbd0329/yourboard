@@ -35,12 +35,24 @@ public class BoardController {
 
     @PutMapping("/api/post/{id}") //비밀번호 조회 후 게시글 수정
     public BoardResponseDto updateBoard(@PathVariable Long id, @RequestBody BoardRequestDto boardRequestDto)
-    {return boardService.updateBoard(id,boardRequestDto);}
-
-    @DeleteMapping("/api/delete/{id}")
-    public Long deleteBoard(@PathVariable Long id) {
-        return boardService.deleteBoard(id);
+    {
+        return boardService.updateBoard(id,boardRequestDto);
     }
+
+    @DeleteMapping("/api/post/{id}")
+    public void deleteBoard(@PathVariable Long id, @RequestBody BoardRequestDto boardRequestDto)
+    {
+        System.out.println("제발 떠");
+        boardService.deleteBoard(id,boardRequestDto);
+    }
+
+
+
+
+//    @DeleteMapping("/api/delete/{id}") //무엇이든 삭제하는 녀석에서 비밀번호를 확인하려고 하는데 왜 안되냐
+//    public Map<String, Object> deleteBoard(@PathVariable Long id, @RequestBody BoardRequestDto boardRequestDto) {
+//        return boardService.deleteBoard(id,boardRequestDto);
+//    }
 
 
 
