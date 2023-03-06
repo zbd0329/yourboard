@@ -3,11 +3,16 @@ package com.example.yourboard.service;
 import com.example.yourboard.dto.BoardRequestDto;
 import com.example.yourboard.dto.BoardResponseDto;
 import com.example.yourboard.entity.Board;
+import com.example.yourboard.entity.User;
+import com.example.yourboard.jwt.JwtUtil;
 import com.example.yourboard.repository.BoardRepository;
+import com.example.yourboard.repository.UserRepository;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 
@@ -17,21 +22,48 @@ public class BoardService {
 
 
     private final BoardRepository boardRepository;
+    private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
 
 
     //게시글 저장
-    public Board writeBoard(BoardRequestDto boardDto) {
-        Board board = new Board(boardDto); //생성자가 있어야 함
-        boardRepository.save(board);
-        return board;
+    public Board writeBoard(BoardRequestDto boardDto, HttpServletRequest requestDto) {
+
+        // Request에서 Token 가져오기
+        String token = jwtUtil.resolveToken(requestDto);
+
+        Claims claims;
+
+        // 토큰이 있는 경우에만 게시글 저장 가능
+        if (token != null) {
+            if (jwtUtil.validateToken(token)) {
+                // 토큰에서 사용자 정보 가져오기
+                claims = jwtUtil.getUserInfoFromToken(token);
+            } else {
+                throw new IllegalArgumentException("Token Error");
+            }
+
+            // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
+            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
+                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+            );
+
+            // 요청받은 DTO 로 DB에 저장할 객체 만들기
+            Board board = new Board(boardDto,user);
+            boardRepository.save(board);
+            return board;
+
+        } else {
+            return null;
+        }
 
     }
-//쉬프트 에프6 한번에 바꾸
 
     //게시글 확인
     @Transactional(readOnly = true)
     public List<Board> getBoard() {
-        return boardRepository.findAll(); //findAll을 써도 되는가
+        List<BoardResponseDto> boardResponseDto;
+        return boardRepository.findAllByOrderByCreatedAtDesc(); //findAll을 써도 되는가
     }
 
 
@@ -45,38 +77,7 @@ public class BoardService {
     }
 
 
-    //게시글 수정
-    @Transactional
-    public BoardResponseDto updateBoard(Long id, BoardRequestDto boardRequestDto) {
-        Board board = checkBoard(id);
-        if (board.getPassword().equals(boardRequestDto.getPassword())) {
-            board.update(boardRequestDto);
-        } else {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
 
-        }
-
-        return new BoardResponseDto(board);
-    }
-
-    //비밀번호 확인
-    private Board checkBoard(Long id) {
-        return boardRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("일치하는 게시글 없또")
-        );
-    }
-
-
-    @Transactional
-    public void deleteBoard(Long id, BoardRequestDto boardRequestDto) {
-        Board board = checkBoard(id);
-        if (board.getPassword().equals(boardRequestDto.getPassword())) {
-            boardRepository.deleteById(id);
-        } else {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
-
-    }
 
 
 }
@@ -85,27 +86,53 @@ public class BoardService {
 
 
 
-
-
-
-//    findAllByOrderByModifiedAtDesc()
-// 드디어 됐다 사실 뭐가 문제였는지 모르겠다. ㅠㅠ
-// 첫번째 시도. 강의에서 쓰는 함수 (findById)에 계속 빨간줄이 뜬다.
-// 두번째 시도. 패스워드를 불러서 비교하려고 했으나 praivate여서 실패
-// 세번째 시도. 그럼 dto 상태는 호출할 수 있지 않나? 실패 request = BoardRequestDto boardRequestDto1;
-// 네번째 시도. 강의에서 쓰는 함수 사용. 근데 다시 하니까 된다. 어째서?
-// 같은 코드를 치는데 어떤건 연결이 되고 안괴고 한다. 그 이유는?
-// 다섯번 째 시도 , 게터 사용 해서 비밀 번호 가져 오기 (게터로 어떻게 가져오는가)
-//세터를 함부를 사용하지 말아라
-//메서드를 통해서 접근해야한다. 그냥 게터와 .을 써서 가져오는 것을 차이는? 캡슐화. 개념을 아는게 중요하다.
-// 람다식을 if문으로 하는 방법 //
-//        equals(boardRequestDto.getPassword())
-//        쓰면 안된다.예상하지 못한 에러가 나면?그것에 대한 대비가 안된다.널포인터리셉션. "String"
-//        equls(board.getPasswqrd) null equels는 없다.null safe equals.
-
+//
+//
+//    //게시글 수정
+//    @Transactional
+//    public BoardResponseDto updateBoard(Long id, BoardRequestDto boardRequestDto) {
+//        Board board = checkBoard(id);
+//        if (board.getPassword().equals(boardRequestDto.getPassword())) {
+//            board.update(boardRequestDto);
+//        } else {
 //            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-//삭제완료는 어떻게 보낼것인가?
-//string으로 바꾸기
+//
+//        }
+//
+//        return new BoardResponseDto(board);
+//    }
+//
+//    //비밀번호 확인
+//    private Board checkBoard(Long id) {
+//        return boardRepository.findById(id).orElseThrow(
+//                () -> new IllegalArgumentException("일치하는 게시글 없또")
+//        );
+//    }
+//
+//
+//    @Transactional
+//    public void deleteBoard(Long id, BoardRequestDto boardRequestDto) {
+//        Board board = checkBoard(id);
+//        if (board.getPassword().equals(boardRequestDto.getPassword())) {
+//            boardRepository.deleteById(id);
+//        } else {
+//            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+//        }
+//
+//    }
+
+//        Board board = new Board(boardDto, user); //생성자가 있어야 함
+//        boardRepository.save(board);
+//        return board;
+
+//쉬프트 에프6 한번에 바꾸
+
+
+
+
+
+
+
 
 
 
