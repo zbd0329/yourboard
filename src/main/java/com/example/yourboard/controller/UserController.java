@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/auth")
+@RequestMapping("/api/auth") //공통된 주소
 public class UserController {
 
     private final UserService userService;
@@ -26,7 +26,7 @@ public class UserController {
     }
 
     @ResponseBody
-    @PostMapping("/login/{id}")
+    @PostMapping("/login")
     public ResponseEntity<StatusCodeDto> login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse response) {
         userService.login(loginRequestDto, response);
         return ResponseEntity.ok(new StatusCodeDto(HttpStatus.OK.value(),"로그인 성공"));
