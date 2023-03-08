@@ -49,9 +49,6 @@ public class Board extends TimeStamped {
 
     }
 
-    public void delete(BoardRequestDto boardRequestDto) {
-        this.title = boardRequestDto.getTitle();
-        this.comment = boardRequestDto.getComment();
-    }
+
 
 }

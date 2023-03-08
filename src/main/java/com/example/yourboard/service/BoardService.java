@@ -14,12 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
@@ -55,7 +53,7 @@ public class BoardService {
             );
 
 
-            // 요청받은 DTO 로 DB에 저장할 객체 만들기
+            // 요청받은 DTO 로 DB에 저장할 객체 만들기 //호버를 써서 넣어줘야하는 파라미터값을 확인잘하자. 어떤 함수를 쓰는지 체크하고 생각할것.
             Board board = new Board(boardDto,user);
             boardRepository.save(board);
             return new BoardResponseDto(board);
@@ -129,7 +127,7 @@ public class BoardService {
     }
 
 
-    public ResponseEntity<StatusCodeDto> deleteBoard(Long id,BoardRequestDto boardDto, HttpServletRequest requestDto) {
+    public ResponseEntity<StatusCodeDto> deleteBoard(Long id, HttpServletRequest requestDto) {
         // Request에서 Token 가져오기
         String token = jwtUtil.resolveToken(requestDto);
 

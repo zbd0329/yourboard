@@ -44,10 +44,9 @@ public class BoardController {
     }
 
     @DeleteMapping("/api/post/{id}")
-    public ResponseEntity<StatusCodeDto> deleteBoard(@PathVariable Long id,@RequestBody BoardRequestDto boardRequestDto, HttpServletRequest requestDto) {
-        System.out.println("제발 떠"); //터미널에 뜬다. 귀엽다
+    public ResponseEntity<StatusCodeDto> deleteBoard(@PathVariable Long id, HttpServletRequest requestDto) {
 
-        return boardService.deleteBoard(id,boardRequestDto, requestDto);
+        return boardService.deleteBoard(id, requestDto);
     }
 }
 

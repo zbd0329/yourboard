@@ -16,12 +16,5 @@ public class BoardRequestDto {
     private LocalDateTime ModifiedAt;
     private LocalDateTime createdAt;
 
-    public BoardRequestDto(BoardRequestDto boardRequesDto) {
-        this.id = boardRequesDto.id;
-        this.title = boardRequesDto.title;
-        this.comment = boardRequesDto.comment;
-        this.username = boardRequesDto.username;
-        ModifiedAt = boardRequesDto.ModifiedAt;
-        this.createdAt = boardRequesDto.createdAt;
-    }
+
 }
